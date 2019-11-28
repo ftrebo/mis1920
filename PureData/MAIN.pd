@@ -1,0 +1,78 @@
+#N canvas -8 -8 1366 695 12;
+#X obj 48 45 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 48 85 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 48 63 proj_metronome;
+#X obj 48 127 proj_note;
+#X floatatom 48 151 5 0 0 0 - - -;
+#X obj 47 305 proj_vco;
+#X obj 617 95 cnv 15 280 400 empty empty empty 20 12 0 14 -233017 -66577
+0;
+#X obj 646 353 vsl 15 128 0 127 0 0 note1 empty 1 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 676 353 vsl 15 128 0 127 0 0 note2 empty 2 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 706 353 vsl 15 128 0 127 0 0 note3 empty 3 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 736 353 vsl 15 128 0 127 0 0 note4 empty 4 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 766 353 vsl 15 128 0 127 0 0 note5 empty 5 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 796 353 vsl 15 128 0 127 0 0 note6 empty 6 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 826 353 vsl 15 128 0 127 0 0 note7 empty 7 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 856 353 vsl 15 128 0 127 0 0 note8 empty 8 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 646 316 bng 15 50 20 0 empty bang1 empty 17 7 0 10 -262144 -4160
+-1;
+#X obj 676 316 bng 15 50 20 0 empty bang2 empty 17 7 0 10 -262144 -4160
+-1;
+#X obj 706 316 bng 15 50 20 0 empty bang3 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 736 316 bng 15 50 20 0 empty bang4 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 766 316 bng 15 50 20 0 empty bang5 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 796 316 bng 15 50 20 0 empty bang6 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 826 316 bng 15 50 20 0 empty bang7 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 856 316 bng 15 50 20 0 empty bang8 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 649 274 hsl 220 30 70 350 0 0 tempo_s empty Tempo 95 -8 0 10
+-262144 -1 -1 0 1;
+#X obj 646 124 vsl 15 128 0 127 0 0 shape_s empty Shape 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 691 124 vsl 15 128 0 127 0 0 detune_s empty Detune 0 -9 0 10
+-262144 -1 -1 0 1;
+#X obj 856 124 vsl 15 128 0 127 0 0 noise_s empty Noise 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 811 124 vsl 15 128 0 127 0 0 decay_s empty Decay 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 743 123 vsl 30 128 0 127 0 0 cutoff_s empty LPF 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 50 225 r shape_s;
+#X floatatom 50 249 5 0 0 0 - - -;
+#X floatatom 121 249 5 0 0 0 - - -;
+#X obj 121 225 r detune_s;
+#X floatatom 199 249 5 0 0 0 - - -;
+#X floatatom 276 249 5 0 0 0 - - -;
+#X obj 199 225 r cutoff_s;
+#X obj 276 225 r decay_s;
+#X floatatom 346 249 5 0 0 0 - - -;
+#X obj 346 225 r noise_s;
+#X obj 143 41 r tempo_s;
+#X floatatom 154 64 5 0 0 0 - - -;
+#X text 193 64 BPM;
+#X connect 0 0 2 0;
+#X connect 2 0 1 0;
+#X connect 3 0 4 0;
+#X connect 29 0 30 0;
+#X connect 32 0 31 0;
+#X connect 35 0 33 0;
+#X connect 36 0 34 0;
+#X connect 38 0 37 0;
+#X connect 39 0 2 1;
+#X connect 39 0 40 0;
