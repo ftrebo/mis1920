@@ -1,13 +1,8 @@
 #N canvas -8 -8 1366 695 12;
-#X obj 48 45 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
-#X obj 48 94 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
-#X obj 48 68 proj_metronome;
-#X obj 619 95 cnv 15 280 400 empty empty empty 20 12 0 14 -233017 -66577
+#X obj 619 95 cnv 15 280 400 empty empty empty 20 12 0 14 -232576 -66577
 0;
 #X obj 646 353 vsl 15 128 0 127 0 0 note1 empty 1 5 -9 0 10 -262144
--1 -1 8500 1;
+-1 -1 0 1;
 #X obj 676 353 vsl 15 128 0 127 0 0 note2 empty 2 5 -9 0 10 -262144
 -1 -1 0 1;
 #X obj 706 353 vsl 15 128 0 127 0 0 note3 empty 3 5 -9 0 10 -262144
@@ -38,8 +33,8 @@
 -1;
 #X obj 856 316 bng 15 50 20 0 empty bang8 empty 17 7 0 10 -262144 -1
 -1;
-#X obj 649 274 hsl 220 30 70 350 0 0 tempo_s empty Tempo 95 -8 0 10
--262144 -1 -1 19500 1;
+#X obj 649 274 hsl 220 30 70 350 0 0 tempo_s initial_tempo_s Tempo
+95 -8 0 10 -262144 -1 -1 10950 1;
 #X obj 646 124 vsl 15 128 0 127 0 0 shape_s empty Shape 0 -9 0 10 -262144
 -1 -1 0 1;
 #X obj 691 124 vsl 15 128 0 127 0 0 detune_s empty Detune 0 -9 0 10
@@ -48,49 +43,70 @@
 -1 -1 0 1;
 #X obj 811 124 vsl 15 128 0 127 0 0 decay_s empty Decay 0 -9 0 10 -262144
 -1 -1 0 1;
-#X obj 743 123 vsl 30 128 0 127 0 0 cutoff_s empty LPF 0 -9 0 10 -262144
--1 -1 0 1;
-#X obj 143 41 r tempo_s;
-#X floatatom 154 69 5 0 0 0 - - -;
-#X text 193 69 BPM;
-#X obj 35 285 cnv 15 320 60 empty empty empty 20 12 0 14 -204786 -66577
+#X obj 743 123 vsl 30 128 1.27 127 0 1 cutoff_s initial_cutoff_s LPF
+0 -9 0 10 -262144 -1 -1 12700 1;
+#X obj 35 31 cnv 15 320 110 empty empty Initialization 20 12 0 12 -261682
+-66577 0;
+#X obj 49 105 s initial_tempo_s;
+#X msg 49 81 210;
+#X obj 49 57 loadbang;
+#X obj 179 105 s initial_cutoff_s;
+#X obj 179 56 loadbang;
+#X msg 179 81 127;
+#X obj 35 152 cnv 15 320 110 empty empty Metronome 20 12 0 12 -261682
+-66577 0;
+#X obj 49 184 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 49 233 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 49 207 proj_metronome;
+#X obj 144 180 r tempo_s;
+#X floatatom 155 208 5 0 0 0 - - -;
+#X text 194 208 BPM;
+#X obj 35 269 cnv 15 320 320 empty empty Sound_path 20 12 0 12 -261682
+-66577 0;
+#X obj 45 316 cnv 15 300 60 empty empty empty 20 12 0 14 -204786 -66577
 0;
-#X obj 49 294 proj_note;
-#X floatatom 49 318 5 0 0 0 - - -;
-#X obj 49 377 proj_vco;
-#X obj 200 294 r shape_s;
-#X floatatom 200 318 5 0 0 0 - - -;
-#X floatatom 121 318 5 0 0 0 - - -;
-#X obj 121 294 r detune_s;
-#X floatatom 272 318 5 0 0 0 - - -;
-#X obj 272 294 r noise_s;
-#X text 52 267 Slider values from GUI;
-#X obj 186 373 cnv 15 170 60 empty empty empty 20 12 0 14 -204786 -66577
+#X obj 49 325 proj_note;
+#X floatatom 49 349 5 0 0 0 - - -;
+#X obj 49 408 proj_vco;
+#X obj 200 325 r shape_s;
+#X floatatom 200 349 5 0 0 0 - - -;
+#X floatatom 121 349 5 0 0 0 - - -;
+#X obj 121 325 r detune_s;
+#X floatatom 272 349 5 0 0 0 - - -;
+#X obj 272 325 r noise_s;
+#X text 52 298 Slider values from GUI;
+#X obj 192 404 cnv 15 155 60 empty empty empty 20 12 0 14 -204786 -66577
 0;
-#X text 193 355 Slider values from GUI;
-#X floatatom 197 405 5 0 0 0 - - -;
-#X floatatom 274 405 5 0 0 0 - - -;
-#X obj 197 381 r cutoff_s;
-#X obj 274 381 r decay_s;
-#X obj 49 447 proj_vcf;
-#X obj 50 484 proj_vca_env;
-#X obj 50 526 dac~;
-#X connect 0 0 2 0;
-#X connect 2 0 1 0;
-#X connect 26 0 2 1;
-#X connect 26 0 27 0;
-#X connect 30 0 31 0;
-#X connect 31 0 32 0;
-#X connect 32 0 46 0;
-#X connect 33 0 34 0;
-#X connect 34 0 32 2;
-#X connect 35 0 32 1;
-#X connect 36 0 35 0;
-#X connect 38 0 37 0;
-#X connect 42 0 46 1;
-#X connect 43 0 47 1;
-#X connect 44 0 42 0;
-#X connect 45 0 43 0;
-#X connect 46 0 47 0;
-#X connect 47 0 48 0;
-#X connect 47 0 48 1;
+#X text 193 386 Slider values from GUI;
+#X floatatom 197 436 5 0 0 0 - - -;
+#X floatatom 274 436 5 0 0 0 - - -;
+#X obj 197 412 r cutoff_s;
+#X obj 274 412 r decay_s;
+#X obj 49 478 proj_vcf;
+#X obj 50 515 proj_vca_env;
+#X obj 50 557 dac~;
+#X connect 25 0 24 0;
+#X connect 26 0 25 0;
+#X connect 28 0 29 0;
+#X connect 29 0 27 0;
+#X connect 31 0 33 0;
+#X connect 33 0 32 0;
+#X connect 34 0 33 1;
+#X connect 34 0 35 0;
+#X connect 39 0 40 0;
+#X connect 40 0 41 0;
+#X connect 41 0 55 0;
+#X connect 42 0 43 0;
+#X connect 43 0 41 2;
+#X connect 44 0 41 1;
+#X connect 45 0 44 0;
+#X connect 47 0 46 0;
+#X connect 51 0 55 1;
+#X connect 52 0 56 1;
+#X connect 53 0 51 0;
+#X connect 54 0 52 0;
+#X connect 55 0 56 0;
+#X connect 56 0 57 0;
+#X connect 56 0 57 1;
