@@ -1,16 +1,13 @@
 #N canvas -8 -8 1366 695 12;
 #X obj 48 45 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
-#X obj 48 85 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+#X obj 48 94 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
-#X obj 48 63 proj_metronome;
-#X obj 48 127 proj_note;
-#X floatatom 48 151 5 0 0 0 - - -;
-#X obj 47 305 proj_vco;
-#X obj 617 95 cnv 15 280 400 empty empty empty 20 12 0 14 -233017 -66577
+#X obj 48 68 proj_metronome;
+#X obj 619 95 cnv 15 280 400 empty empty empty 20 12 0 14 -233017 -66577
 0;
 #X obj 646 353 vsl 15 128 0 127 0 0 note1 empty 1 5 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 8500 1;
 #X obj 676 353 vsl 15 128 0 127 0 0 note2 empty 2 5 -9 0 10 -262144
 -1 -1 0 1;
 #X obj 706 353 vsl 15 128 0 127 0 0 note3 empty 3 5 -9 0 10 -262144
@@ -42,7 +39,7 @@
 #X obj 856 316 bng 15 50 20 0 empty bang8 empty 17 7 0 10 -262144 -1
 -1;
 #X obj 649 274 hsl 220 30 70 350 0 0 tempo_s empty Tempo 95 -8 0 10
--262144 -1 -1 0 1;
+-262144 -1 -1 19500 1;
 #X obj 646 124 vsl 15 128 0 127 0 0 shape_s empty Shape 0 -9 0 10 -262144
 -1 -1 0 1;
 #X obj 691 124 vsl 15 128 0 127 0 0 detune_s empty Detune 0 -9 0 10
@@ -53,26 +50,47 @@
 -1 -1 0 1;
 #X obj 743 123 vsl 30 128 0 127 0 0 cutoff_s empty LPF 0 -9 0 10 -262144
 -1 -1 0 1;
-#X obj 50 225 r shape_s;
-#X floatatom 50 249 5 0 0 0 - - -;
-#X floatatom 121 249 5 0 0 0 - - -;
-#X obj 121 225 r detune_s;
-#X floatatom 199 249 5 0 0 0 - - -;
-#X floatatom 276 249 5 0 0 0 - - -;
-#X obj 199 225 r cutoff_s;
-#X obj 276 225 r decay_s;
-#X floatatom 346 249 5 0 0 0 - - -;
-#X obj 346 225 r noise_s;
 #X obj 143 41 r tempo_s;
-#X floatatom 154 64 5 0 0 0 - - -;
-#X text 193 64 BPM;
+#X floatatom 154 69 5 0 0 0 - - -;
+#X text 193 69 BPM;
+#X obj 35 285 cnv 15 320 60 empty empty empty 20 12 0 14 -204786 -66577
+0;
+#X obj 49 294 proj_note;
+#X floatatom 49 318 5 0 0 0 - - -;
+#X obj 49 377 proj_vco;
+#X obj 200 294 r shape_s;
+#X floatatom 200 318 5 0 0 0 - - -;
+#X floatatom 121 318 5 0 0 0 - - -;
+#X obj 121 294 r detune_s;
+#X floatatom 272 318 5 0 0 0 - - -;
+#X obj 272 294 r noise_s;
+#X text 52 267 Slider values from GUI;
+#X obj 186 373 cnv 15 170 60 empty empty empty 20 12 0 14 -204786 -66577
+0;
+#X text 193 355 Slider values from GUI;
+#X floatatom 197 405 5 0 0 0 - - -;
+#X floatatom 274 405 5 0 0 0 - - -;
+#X obj 197 381 r cutoff_s;
+#X obj 274 381 r decay_s;
+#X obj 49 447 proj_vcf;
+#X obj 50 484 proj_vca_env;
+#X obj 50 526 dac~;
 #X connect 0 0 2 0;
 #X connect 2 0 1 0;
-#X connect 3 0 4 0;
-#X connect 29 0 30 0;
-#X connect 32 0 31 0;
-#X connect 35 0 33 0;
-#X connect 36 0 34 0;
+#X connect 26 0 2 1;
+#X connect 26 0 27 0;
+#X connect 30 0 31 0;
+#X connect 31 0 32 0;
+#X connect 32 0 46 0;
+#X connect 33 0 34 0;
+#X connect 34 0 32 2;
+#X connect 35 0 32 1;
+#X connect 36 0 35 0;
 #X connect 38 0 37 0;
-#X connect 39 0 2 1;
-#X connect 39 0 40 0;
+#X connect 42 0 46 1;
+#X connect 43 0 47 1;
+#X connect 44 0 42 0;
+#X connect 45 0 43 0;
+#X connect 46 0 47 0;
+#X connect 47 0 48 0;
+#X connect 47 0 48 1;
