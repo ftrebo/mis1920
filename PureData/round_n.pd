@@ -1,0 +1,14 @@
+#N canvas 0 50 450 300 12;
+#X obj 9 169 int;
+#X obj 9 145 + 0.49999;
+#X obj 9 7 inlet;
+#X obj 9 193 outlet;
+#X obj 9 77 cyclone/scale 0 127 24 107;
+#X obj 116 39 r low_note;
+#X obj 196 39 r top_note;
+#X connect 0 0 3 0;
+#X connect 1 0 0 0;
+#X connect 2 0 4 0;
+#X connect 4 0 1 0;
+#X connect 5 0 4 3;
+#X connect 6 0 4 4;
