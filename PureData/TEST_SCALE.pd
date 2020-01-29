@@ -1,0 +1,126 @@
+#N canvas -8 -8 1370 729 12;
+#X obj 389 31 cnv 15 280 580 empty empty empty 20 12 0 14 -232576 -66577
+0;
+#X obj 414 335 vsl 20 250 0 127 0 0 note1 r_note1 1 5 -9 0 10 -262144
+-1 -1 8100 1;
+#X obj 444 335 vsl 20 250 0 127 0 0 note2 r_note2 2 5 -9 0 10 -262144
+-1 -1 9800 1;
+#X obj 474 335 vsl 20 250 0 127 0 0 note3 r_note3 3 5 -9 0 10 -262144
+-1 -1 8200 1;
+#X obj 504 335 vsl 20 250 0 127 0 0 note4 r_note4 4 5 -9 0 10 -262144
+-1 -1 10600 1;
+#X obj 534 335 vsl 20 250 0 127 0 0 note5 r_note5 5 5 -9 0 10 -262144
+-1 -1 5600 1;
+#X obj 564 335 vsl 20 250 0 127 0 0 note6 r_note6 6 5 -9 0 10 -262144
+-1 -1 10700 1;
+#X obj 594 335 vsl 20 250 0 127 0 0 note7 r_note7 7 5 -9 0 10 -262144
+-1 -1 8800 1;
+#X obj 624 335 vsl 20 250 0 127 0 0 note8 r_note8 8 5 -9 0 10 -262144
+-1 -1 12500 1;
+#X obj 416 298 bng 15 50 20 0 empty bang1 empty 17 7 0 10 -262144 -4160
+-1;
+#X obj 446 298 bng 15 50 20 0 empty bang2 empty 17 7 0 10 -262144 -4160
+-1;
+#X obj 476 298 bng 15 50 20 0 empty bang3 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 506 298 bng 15 50 20 0 empty bang4 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 536 298 bng 15 50 20 0 empty bang5 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 566 298 bng 15 50 20 0 empty bang6 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 596 298 bng 15 50 20 0 empty bang7 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 626 298 bng 15 50 20 0 empty bang8 empty 17 7 0 10 -262144 -1
+-1;
+#X obj 419 256 hsl 220 30 70 470 0 0 tempo_s r_tempo_s Tempo 95 -8
+0 10 -262144 -1 -1 21900 1;
+#X obj 416 106 vsl 15 128 0 127 0 0 shape_s r_shape_s Shape -8 -9 0
+10 -262144 -1 -1 12500 1;
+#X obj 461 106 vsl 15 128 0 127 0 0 detune_s r_detune_s Detune -11
+-9 0 10 -262144 -1 -1 7100 1;
+#X obj 581 106 vsl 15 128 0 127 0 0 sustain_s r_sustain_s Sustain -15
+-9 0 10 -262144 -1 -1 10800 1;
+#X obj 513 105 vsl 30 128 1.27 127 0 1 cutoff_s r_cutoff_s LPF 5 -9
+0 10 -262144 -1 -1 12700 1;
+#X obj 35 31 cnv 15 340 110 empty empty Initialization 20 12 0 12 -261682
+-66577 0;
+#X msg 49 81 210;
+#X obj 49 57 loadbang;
+#X obj 179 56 loadbang;
+#X msg 179 81 127;
+#X obj 35 152 cnv 15 340 110 empty empty Metronome 20 12 0 12 -261682
+-66577 0;
+#X obj 181 237 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 181 211 proj_metronome;
+#X obj 228 159 r tempo_s;
+#X floatatom 231 183 5 0 0 0 - - -;
+#X text 270 183 BPM;
+#X obj 35 273 cnv 15 340 320 empty empty Sound_path 20 12 0 12 -261682
+-66577 0;
+#X obj 45 320 cnv 15 300 60 empty empty empty 20 12 0 14 -204786 -66577
+0;
+#X obj 49 329 proj_note;
+#X floatatom 49 353 5 0 0 0 - - -;
+#X obj 49 413 proj_vco;
+#X obj 200 329 r shape_s;
+#X floatatom 200 353 5 0 0 0 - - -;
+#X floatatom 121 353 5 0 0 0 - - -;
+#X obj 121 329 r detune_s;
+#X floatatom 272 353 5 0 0 0 - - -;
+#X obj 272 329 r noise_s;
+#X text 52 302 Slider values from GUI;
+#X obj 191 408 cnv 15 170 60 empty empty empty 20 12 0 14 -204786 -66577
+0;
+#X text 193 390 Slider values from GUI;
+#X floatatom 197 440 5 0 0 0 - - -;
+#X floatatom 274 440 5 0 0 0 - - -;
+#X obj 197 416 r cutoff_s;
+#X obj 50 482 proj_vcf;
+#X obj 51 519 proj_vca_env;
+#X obj 51 561 dac~;
+#X obj 181 160 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 200 496 bng 15 250 50 0 empty gate empty 17 7 0 10 -262144 -1
+-1;
+#X text 216 494 Gate;
+#X obj 482 40 bng 40 250 50 0 play_s empty Play 9 19 0 10 -204786 -1
+-1;
+#X obj 533 40 bng 40 250 50 0 stop_s empty Stop 9 19 0 10 -261234 -1
+-1;
+#X obj 44 223 latch;
+#X obj 44 179 r play_s;
+#X obj 76 201 r stop_s;
+#X obj 274 416 r sustain_s;
+#X obj 304 159 r stop_s;
+#X obj 276 236 s step;
+#X text 99 113 Delete this;
+#X connect 24 0 23 0;
+#X connect 25 0 26 0;
+#X connect 29 0 28 0;
+#X connect 29 1 63 0;
+#X connect 30 0 31 0;
+#X connect 30 0 29 1;
+#X connect 35 0 36 0;
+#X connect 36 0 37 0;
+#X connect 37 0 50 0;
+#X connect 38 0 39 0;
+#X connect 39 0 37 2;
+#X connect 40 0 37 1;
+#X connect 41 0 40 0;
+#X connect 42 0 37 3;
+#X connect 43 0 42 0;
+#X connect 47 0 50 1;
+#X connect 48 0 51 1;
+#X connect 49 0 47 0;
+#X connect 50 0 51 0;
+#X connect 51 0 52 0;
+#X connect 51 0 52 1;
+#X connect 53 0 29 0;
+#X connect 54 0 51 2;
+#X connect 58 0 53 0;
+#X connect 59 0 58 0;
+#X connect 60 0 58 1;
+#X connect 61 0 48 0;
+#X connect 62 0 29 2;
