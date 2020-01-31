@@ -67,8 +67,8 @@ short green = 128;  //0-255
 float glight=0;
 short blue = 128;  //0-255
 float blight=1;
-short blackPoint = 10;  //minimum value for rgb
-float light = 0.9;  //0-1; 1 means that that each rgb value can reach maximum saturation
+short blackPoint = 20;  //minimum value for rgb
+float light = 0.3;  //0-1; 1 means that that each rgb value can reach maximum saturation
 
 /*Sun Color*/
 color sunColor = #ffccee;
@@ -84,22 +84,28 @@ float flyingTerrain = 0;                                    /**/
 float flyingColor= 0;                                       /**/
 float offsetIncrement = 0;                                  /**/
 float colorOffsetIncrement = 0;                             /**/
+Star stars[];                                               /**/
 int bpm = 200;                                              /**/
 int bpm_multiplier = 1;                                     /**/
+float starspeed_multiplier = 1;                             /**/
 int user_bpm = 0;                                           /**/
 int asseY = 122;                                            /**/
 /**************************************************************/
 
 void setup() {
   frameRate(50);
-  size(600, 600, P3D);
-  //fullScreen(P3D);
+  //size(600, 600, P3D);
+  fullScreen(P3D);
   rows = (int)(h/scl);
   cols = (int)(w/scl);
   elevation = new float[cols][rows];
   boxColor = new color[cols][rows];
   offsetIncrement = map(granularity, 0, 255, 0.05, 0.5);
   colorOffsetIncrement = map(colorGranularity, 0, 255, 0, 1);
+  stars = new Star[100];
+  for (int i=0; i < stars.length; i++) {
+    stars[i] = new Star();
+  }
 
   serial = new Serial(this, Serial.list()[0], 9600);
   serial.bufferUntil('\n');
@@ -108,19 +114,20 @@ void setup() {
 
 void draw() {
   float wait = 3750*bpm_multiplier / bpm;
+  background(0);
+  space_init(PI/2.5);
+
   if (millis() > realMillis + wait) {
     realMillis = millis();
-    
-    background(0);
     elevation_init();
-    space_init(PI/2.5);
-    draw_terrain();
-    
-    if (level >= 50) draw_sun();
     
     if (isBpmGood(bpm, user_bpm)) level += 1;
-    else if (level <= 0) level = 0; else level -= 1;
+    else if (level <= 0) level = 0; 
+    else level -= 1;
   }
+  draw_stars();
+  draw_terrain();
+  
 }
 
 boolean isBpmGood(int bpm, int user_bpm) {
@@ -130,7 +137,6 @@ boolean isBpmGood(int bpm, int user_bpm) {
   if (abs(bpm/2 - user_bpm) < tollerance/2) return true;
   if (abs(bpm/4 - user_bpm) < tollerance/4) return true;
   if (abs(bpm/8 - user_bpm) < tollerance/8) return true;
-
   return false;
 }
 
@@ -243,6 +249,12 @@ void draw_sun() {
   sphere(300);
 }
 
+void draw_stars() {
+  for (int i=0; i < stars.length; i++) {    
+    stars[i].update(starspeed_multiplier);
+    stars[i].show();
+  }
+}
 
 static abstract class TerrainMode {
   static final int GRID = 0;
@@ -273,6 +285,7 @@ void serialEvent(Serial serial) {
       command = serialIn.substring(0, 2);
       param = int(serialIn.substring(2, serialIn.indexOf("\n")-1));
       if (command.equals("Y-")) bpm_multiplier = int(map(param, 0, 255, 5, 1));
+      if (command.equals("X-")) starspeed_multiplier = map(param, 0, 255, 0.3, 4);
       if (command.equals("T-")) user_bpm = param;
     } 
     catch (Exception e) {
@@ -284,6 +297,7 @@ void serialEvent(Serial serial) {
 void oscEvent(OscMessage theOscMessage) {
   if (theOscMessage.checkAddrPattern("/tempo")==true) {
     bpm = int(oscReceive(theOscMessage));
+    serial.write("T");
   } else if (theOscMessage.checkAddrPattern("/Yaxis")==true) {
     rlight = oscReceive(theOscMessage);
   } else if (theOscMessage.checkAddrPattern("/Xaxis")==true) {
