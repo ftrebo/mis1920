@@ -1,16 +1,29 @@
 /********************************************************************************************************/
-/* Rolling Terrain Demo                                                                                 */
-/* Author: Domenico Stefani                                                                             */
-/* Inspired by: Coding Challenge #11: 3D Terrain Generation with Perlin Noise in Processing             */
-/* https://www.youtube.com/watch?v=IKB1hWWedMk                                                          */
+/* OSC Based Rolling Terrain Demo                                                                       */
+/* Authors: Domenico Stefani, Francesco Trebo                                                           */
 /********************************************************************************************************/
+
+import processing.serial.*;
+import oscP5.*;
 
 /*---------------------------------------------------*/
 /* Parameters                                        */
 /*---------------------------------------------------*/
-float w = 2000;  //Width of the terrain grid
-float h = 1600;  //Height of the terrain grid
-float scl = 10;  //Size of the small squares of the terrain grid (Default: 20)
+int level = 0;
+final float relative_bpm_tollerance = 0.1;
+
+/*---------------------------------------------------*/
+/* Connections Parameters                            */
+/*---------------------------------------------------*/
+Serial serial;
+OscP5 osc;
+
+/*---------------------------------------------------*/
+/* Graphic Parameters                                */
+/*---------------------------------------------------*/
+float w = 3000;  //Width of the terrain grid
+float h = 1000;  //Height of the terrain grid
+float scl = 20;  //Size of the small squares of the terrain grid (Default: 20)
 float zscl = scl*8;  //Range of elevation on the z axis (Default: 10*scl)
 int speed = 40;  //0-255; Terrain speed (Default: 50)
 float granularity = 100;  //0-255; Terrain granularity (Default: 85) It changes the range of the input of the perlin noise algoritm resulting in a more dense or more flat surface
@@ -47,12 +60,14 @@ int smode = SunMode.COLOR_LIGHTS_BLACK_STROKE;
  */
 
 /*Terrain Color*/
-short colorGranularity = 1;
-//Differenciating factors
-short red = 50;  //0-255
-short green = 1;  //0-255
-short blue = 2;  //0-255
-short blackPoint = 20;  //minimum value for rgb
+short colorGranularity = 1; //Differenciating factors
+short red = 128;  //0-255
+float rlight= 1;
+short green = 128;  //0-255
+float glight=0;
+short blue = 128;  //0-255
+float blight=1;
+short blackPoint = 10;  //minimum value for rgb
 float light = 0.9;  //0-1; 1 means that that each rgb value can reach maximum saturation
 
 /*Sun Color*/
@@ -62,70 +77,82 @@ color sunColor = #ffccee;
 
 /*DO NOT CHANGE OR DELETE**************************************/
 int realMillis = millis();                                  /**/
-int rows,cols;   //Number of rows and columns               /**/
+int rows, cols;  //Number of rows and columns               /**/
 float[][] elevation;                                        /**/
 color[][] boxColor;                                         /**/
 float flyingTerrain = 0;                                    /**/
 float flyingColor= 0;                                       /**/
 float offsetIncrement = 0;                                  /**/
 float colorOffsetIncrement = 0;                             /**/
+int bpm = 200;                                              /**/
+int bpm_multiplier = 1;                                     /**/
+int user_bpm = 0;                                           /**/
+int asseY = 122;                                            /**/
 /**************************************************************/
 
-void setup(){
-  frameRate(24);
-  size(600,600,P3D);
+void setup() {
+  frameRate(50);
+  size(600, 600, P3D);
+  //fullScreen(P3D);
   rows = (int)(h/scl);
   cols = (int)(w/scl);
   elevation = new float[cols][rows];
   boxColor = new color[cols][rows];
-  offsetIncrement = map(granularity,0,255,0.05,0.5);
-  colorOffsetIncrement = map(colorGranularity,0,255,0,1);
+  offsetIncrement = map(granularity, 0, 255, 0.05, 0.5);
+  colorOffsetIncrement = map(colorGranularity, 0, 255, 0, 1);
+
+  serial = new Serial(this, Serial.list()[0], 9600);
+  serial.bufferUntil('\n');
+  osc = new OscP5(this, 8080);
 }
 
-boolean flag = false;
-void draw(){
-
-  //if(millis() > realMillis + 5000){
-  //  flag = false;
-  //  realMillis = millis();
-  //  tmode = (tmode+1)%6;
-  //  speed = 0;
-  //}
-  //if(millis() > realMillis + 5000 && flag == false){
-  //  smode = (smode+1)%8;
-  //  flag = true;
-  //  speed = 40;
-  //}
-
-  background(0);
-  elevation_init();
-  space_init(PI/2.5);
-  //draw_stars();
-  draw_terrain();
-  draw_sun();
+void draw() {
+  float wait = 3750*bpm_multiplier / bpm;
+  if (millis() > realMillis + wait) {
+    realMillis = millis();
+    
+    background(0);
+    elevation_init();
+    space_init(PI/2.5);
+    draw_terrain();
+    
+    if (level >= 50) draw_sun();
+    
+    if (isBpmGood(bpm, user_bpm)) level += 1;
+    else if (level <= 0) level = 0; else level -= 1;
+  }
 }
 
+boolean isBpmGood(int bpm, int user_bpm) {
+  float tollerance = bpm * relative_bpm_tollerance;
+  if (abs(bpm*2 - user_bpm) < tollerance*2) return true;
+  if (abs(bpm - user_bpm) < tollerance) return true;
+  if (abs(bpm/2 - user_bpm) < tollerance/2) return true;
+  if (abs(bpm/4 - user_bpm) < tollerance/4) return true;
+  if (abs(bpm/8 - user_bpm) < tollerance/8) return true;
 
+  return false;
+}
 
-void elevation_init(){
-  flyingTerrain -= map(speed,0,255,0,offsetIncrement);
-  flyingColor -= map(speed,0,255,0,colorOffsetIncrement);
+void elevation_init() {
+  flyingTerrain -= map(speed, 0, 255, 0, offsetIncrement);
+  flyingColor -= map(speed, 0, 255, 0, colorOffsetIncrement);
   float yoff = flyingTerrain;
   float yCoff = flyingColor;
-  for(int y=0; y < rows; y++){
+  for (int y=0; y < rows; y++) {
     float xoff = 0;
     float xCoff = 0;
-    for(int x=0; x < cols; x++){
+    for (int x=0; x < cols; x++) {
       float maxvalue = +zscl/2;
-      if(yoff < (offsetIncrement*rows*growthLimit)+flyingTerrain)
-        maxvalue *= map(yoff,flyingTerrain,flyingTerrain+(offsetIncrement*rows),0,1);
-      elevation[x][y] = map(noise(xoff,yoff),0,1,-maxvalue,maxvalue);
-      if(tmode == TerrainMode.SHADOW_GRID_BLACK_STROKE || tmode == TerrainMode.SHADOW_GRID_WHITE_STROKE)
-        boxColor[x][y] = color(((noise(xCoff,yCoff))*255));
-      else if(tmode == TerrainMode.COLOR_GRID_BLACK_STROKE || tmode == TerrainMode.COLOR_GRID_WHITE_STROKE)
-        boxColor[x][y] = color(((noise(xCoff,yCoff)*100*red)%(255-blackPoint))+blackPoint*light,
-                              ((noise(xCoff,yCoff)*100*green)%(255-blackPoint))+blackPoint*light,
-                              ((noise(xCoff,yCoff)*100*blue)%(255-blackPoint))+blackPoint*light);
+      if (yoff < (offsetIncrement*rows*growthLimit)+flyingTerrain)
+        maxvalue *= map(yoff, flyingTerrain, flyingTerrain+(offsetIncrement*rows), 0, 1);
+      elevation[x][y] = map(noise(xoff, yoff), 0, 1, -maxvalue, maxvalue);
+      if (tmode == TerrainMode.SHADOW_GRID_BLACK_STROKE || tmode == TerrainMode.SHADOW_GRID_WHITE_STROKE)
+        boxColor[x][y] = color(((noise(xCoff, yCoff))*255));
+      else if (tmode == TerrainMode.COLOR_GRID_BLACK_STROKE || tmode == TerrainMode.COLOR_GRID_WHITE_STROKE)
+        boxColor[x][y] = color((((noise(xCoff, yCoff)*100*red)%(255-blackPoint))+blackPoint)*light*rlight, 
+          (((noise(xCoff, yCoff)*100*green)%(255-blackPoint))+blackPoint)*light*glight, 
+          (((noise(xCoff, yCoff)*100*blue)%(255-blackPoint))+blackPoint)*light*blight);
 
       xoff += offsetIncrement;
       xCoff += colorOffsetIncrement;
@@ -135,91 +162,83 @@ void elevation_init(){
   }
 }
 
-void space_init(float angle){
-
-  translate(width/2,height/2);
+void space_init(float angle) {
+  translate(width/2, height/2);
   rotateX(angle);
-  translate(-w/2,-h/2);
+  translate(-w/2, -h/2);
 }
 
-void draw_terrain(){
-
-  switch(tmode){
-    case TerrainMode.GRID:
-      fill(0);
-      stroke(255);
-      break;
-    case TerrainMode.REVERSE_GRID:
-      fill(255);
-      stroke(0);
-      break;
-    case TerrainMode.SHADOW_GRID_WHITE_STROKE:
-    case TerrainMode.COLOR_GRID_WHITE_STROKE:
-      noFill();
-      stroke(255);
-      break;
-    case TerrainMode.SHADOW_GRID_BLACK_STROKE:
-    case TerrainMode.COLOR_GRID_BLACK_STROKE:
-      noFill();
-      stroke(0);
-      break;
+void draw_terrain() {
+  switch(tmode) {
+  case TerrainMode.GRID:
+    fill(0);
+    stroke(255);
+    break;
+  case TerrainMode.REVERSE_GRID:
+    fill(255);
+    stroke(0);
+    break;
+  case TerrainMode.SHADOW_GRID_WHITE_STROKE:
+  case TerrainMode.COLOR_GRID_WHITE_STROKE:
+    noFill();
+    stroke(255);
+    break;
+  case TerrainMode.SHADOW_GRID_BLACK_STROKE:
+  case TerrainMode.COLOR_GRID_BLACK_STROKE:
+    noFill();
+    stroke(0);
+    break;
   }
 
-  for(int y=0; y < rows-1; y++){
+  for (int y=0; y < rows-1; y++) {
     beginShape(TRIANGLE_STRIP);
-    for(int x=0; x < cols; x+=2){
-      if(tmode!=TerrainMode.GRID && tmode!=TerrainMode.REVERSE_GRID)
+    for (int x=0; x < cols; x+=2) {
+      if (tmode!=TerrainMode.GRID && tmode!=TerrainMode.REVERSE_GRID)
         fill(boxColor[x][y]);
-      vertex(x*scl,y*scl, elevation[x][y] );
-      vertex(x*scl,(y+1)*scl, elevation[x][y+1] );
+      vertex(x*scl, y*scl, elevation[x][y] );
+      vertex(x*scl, (y+1)*scl, elevation[x][y+1] );
     }
     endShape();
   }
 }
-void draw_sun(){
-
-  switch(smode){
-    case SunMode.GRID:
-      noFill();
-      stroke(255);
-      break;
-    case SunMode.REVERSE_GRID:
-      fill(255);
-      stroke(0);
-      break;
-    case SunMode.COLOR_WHITE_STROKE:
-      fill(sunColor);
-      stroke(255);
-      break;
-    case SunMode.COLOR_BLACK_STROKE:
-      fill(sunColor);
-      stroke(0);
-      break;
-    case SunMode.COLOR_LIGHTS:
+void draw_sun() {
+  switch(smode) {
+  case SunMode.GRID:
+    noFill();
+    stroke(255);
+    break;
+  case SunMode.REVERSE_GRID:
+    fill(255);
+    stroke(0);
+    break;
+  case SunMode.COLOR_WHITE_STROKE:
+    fill(sunColor);
+    stroke(255);
+    break;
+  case SunMode.COLOR_BLACK_STROKE:
+    fill(sunColor);
+    stroke(0);
+    break;
+  case SunMode.COLOR_LIGHTS:
     lights();
-    case SunMode.COLOR_FLAT:
-      fill(sunColor);
-      noStroke();
-      break;
-    case SunMode.COLOR_LIGHTS_WHITE_STROKE:
-      lights();
-      fill(sunColor);
-      stroke(255);
-      break;
-    case SunMode.COLOR_LIGHTS_BLACK_STROKE:
-      lights();
-      fill(sunColor);
-      stroke(0);
-      break;
+  case SunMode.COLOR_FLAT:
+    fill(sunColor);
+    noStroke();
+    break;
+  case SunMode.COLOR_LIGHTS_WHITE_STROKE:
+    lights();
+    fill(sunColor);
+    stroke(255);
+    break;
+  case SunMode.COLOR_LIGHTS_BLACK_STROKE:
+    lights();
+    fill(sunColor);
+    stroke(0);
+    break;
   }
-
-  //stroke(0);
-  //  lights();
-  //  noStroke();
-  //fill(#ffcc00);
   translate(w/2, -h/5, 0);
-  if(rotateSun)
-    rotateY(radians(frameCount*map(speed,0,255,0.01,3)));
+  if (rotateSun)
+    rotateY(radians(frameCount*map(speed, 0, 255, 0.01, 3)));
   sphereDetail(sunDetail);
   sphere(300);
 }
@@ -234,7 +253,6 @@ static abstract class TerrainMode {
   static final int COLOR_GRID_BLACK_STROKE = 5;
 }
 
-
 static abstract class SunMode {
   static final int GRID = 0;
   static final int REVERSE_GRID = 1;
@@ -246,12 +264,39 @@ static abstract class SunMode {
   static final int COLOR_LIGHTS_BLACK_STROKE = 7;
 }
 
-//void draw_stars(){
-//  pushMatrix();
-//  translate(w/4, -h/8, 0);
-//  fill(255);
-//  stroke(255);
-//  sphereDetail(100);
-//  sphere(100);
-//  popMatrix();
-//}
+String serialIn, command; 
+int param;
+void serialEvent(Serial serial) {
+  serialIn = serial.readStringUntil('\n');
+  if (serialIn != null) {
+    try {
+      command = serialIn.substring(0, 2);
+      param = int(serialIn.substring(2, serialIn.indexOf("\n")-1));
+      if (command.equals("Y-")) bpm_multiplier = int(map(param, 0, 255, 5, 1));
+      if (command.equals("T-")) user_bpm = param;
+    } 
+    catch (Exception e) {
+      println("some error...");
+    }
+  }
+}
+
+void oscEvent(OscMessage theOscMessage) {
+  if (theOscMessage.checkAddrPattern("/tempo")==true) {
+    bpm = int(oscReceive(theOscMessage));
+  } else if (theOscMessage.checkAddrPattern("/Yaxis")==true) {
+    rlight = oscReceive(theOscMessage);
+  } else if (theOscMessage.checkAddrPattern("/Xaxis")==true) {
+    blight = oscReceive(theOscMessage);
+  } else if (theOscMessage.checkAddrPattern("/filter")==true) {
+    light = oscReceive(theOscMessage);
+    zscl = map(oscReceive(theOscMessage), 0, 1, 50, 200);
+  }   
+  //println("Received OSC: "+theOscMessage.addrPattern()+" - ");
+}
+
+float oscReceive(OscMessage oscMessage) {
+  if (oscMessage.checkTypetag("i"))
+    return (float)oscMessage.get(0).intValue();
+  return oscMessage.get(0).floatValue();
+}
