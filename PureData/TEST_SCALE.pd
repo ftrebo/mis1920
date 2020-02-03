@@ -2,21 +2,21 @@
 #X obj 389 31 cnv 15 280 580 empty empty empty 20 12 0 14 -232576 -66577
 0;
 #X obj 414 335 vsl 20 250 0 127 0 0 note1 r_note1 1 5 -9 0 10 -262144
--1 -1 8100 1;
+-1 -1 0 1;
 #X obj 444 335 vsl 20 250 0 127 0 0 note2 r_note2 2 5 -9 0 10 -262144
--1 -1 9800 1;
+-1 -1 0 1;
 #X obj 474 335 vsl 20 250 0 127 0 0 note3 r_note3 3 5 -9 0 10 -262144
--1 -1 8200 1;
+-1 -1 0 1;
 #X obj 504 335 vsl 20 250 0 127 0 0 note4 r_note4 4 5 -9 0 10 -262144
--1 -1 10600 1;
+-1 -1 0 1;
 #X obj 534 335 vsl 20 250 0 127 0 0 note5 r_note5 5 5 -9 0 10 -262144
--1 -1 5600 1;
+-1 -1 0 1;
 #X obj 564 335 vsl 20 250 0 127 0 0 note6 r_note6 6 5 -9 0 10 -262144
--1 -1 10700 1;
+-1 -1 0 1;
 #X obj 594 335 vsl 20 250 0 127 0 0 note7 r_note7 7 5 -9 0 10 -262144
--1 -1 8800 1;
+-1 -1 0 1;
 #X obj 624 335 vsl 20 250 0 127 0 0 note8 r_note8 8 5 -9 0 10 -262144
--1 -1 12500 1;
+-1 -1 0 1;
 #X obj 416 298 bng 15 50 20 0 empty bang1 empty 17 7 0 10 -262144 -4160
 -1;
 #X obj 446 298 bng 15 50 20 0 empty bang2 empty 17 7 0 10 -262144 -4160
@@ -34,13 +34,13 @@
 #X obj 626 298 bng 15 50 20 0 empty bang8 empty 17 7 0 10 -262144 -1
 -1;
 #X obj 419 256 hsl 220 30 70 470 0 0 tempo_s r_tempo_s Tempo 95 -8
-0 10 -262144 -1 -1 21900 1;
+0 10 -262144 -1 -1 6400 1;
 #X obj 416 106 vsl 15 128 0 127 0 0 shape_s r_shape_s Shape -8 -9 0
-10 -262144 -1 -1 12500 1;
+10 -262144 -1 -1 0 1;
 #X obj 461 106 vsl 15 128 0 127 0 0 detune_s r_detune_s Detune -11
--9 0 10 -262144 -1 -1 7100 1;
+-9 0 10 -262144 -1 -1 0 1;
 #X obj 581 106 vsl 15 128 0 127 0 0 sustain_s r_sustain_s Sustain -15
--9 0 10 -262144 -1 -1 10800 1;
+-9 0 10 -262144 -1 -1 0 1;
 #X obj 513 105 vsl 30 128 1.27 127 0 1 cutoff_s r_cutoff_s LPF 5 -9
 0 10 -262144 -1 -1 12700 1;
 #X obj 35 31 cnv 15 340 110 empty empty Initialization 20 12 0 12 -261682
@@ -96,6 +96,35 @@
 #X obj 304 159 r stop_s;
 #X obj 276 236 s step;
 #X text 99 113 Delete this;
+#X obj 810 504 proj_sendosc, f 19;
+#X obj 828 330 r tempo_s;
+#X obj 810 311 bng 15 250 50 0 empty gate empty 17 7 0 10 -262144 -1
+-1;
+#X text 827 310 Gate;
+#X floatatom 810 379 5 0 0 0 - - -;
+#X obj 810 355 f;
+#X obj 810 26 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 842 405 r Xaxis;
+#X obj 875 429 r Yaxis;
+#X obj 907 452 r filter;
+#X obj 940 476 r ribbon;
+#X obj 850 26 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 890 26 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 931 26 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 810 186 s Xaxis;
+#X obj 850 210 s Yaxis;
+#X obj 890 233 s filter;
+#X obj 931 257 s ribbon;
+#X floatatom 810 162 5 0 0 0 - - -;
+#X floatatom 850 162 5 0 0 0 - - -;
+#X floatatom 890 162 5 0 0 0 - - -;
+#X floatatom 931 162 5 0 0 0 - - -;
+#X obj 810 537 tgl 15 0 empty empty 1=connected 20 8 0 8 -262144 -1
+-1 0 1;
 #X connect 24 0 23 0;
 #X connect 25 0 26 0;
 #X connect 29 0 28 0;
@@ -124,3 +153,20 @@
 #X connect 60 0 58 1;
 #X connect 61 0 48 0;
 #X connect 62 0 29 2;
+#X connect 65 0 87 0;
+#X connect 66 0 70 1;
+#X connect 67 0 70 0;
+#X connect 69 0 65 0;
+#X connect 70 0 69 0;
+#X connect 71 0 79 0;
+#X connect 71 0 83 0;
+#X connect 72 0 65 1;
+#X connect 73 0 65 2;
+#X connect 74 0 65 3;
+#X connect 75 0 65 4;
+#X connect 76 0 80 0;
+#X connect 76 0 84 0;
+#X connect 77 0 81 0;
+#X connect 77 0 85 0;
+#X connect 78 0 82 0;
+#X connect 78 0 86 0;
