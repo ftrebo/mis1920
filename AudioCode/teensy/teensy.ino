@@ -9,81 +9,103 @@
 #include <string.h>
 #include <IIRFilter.h>
 
-/* FILTER functioning --------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
+/* Precompiler Options                                                        */
+/*----------------------------------------------------------------------------*/
+
+/* FILTER functioning ------------------*/
 // #define USE_THRESHOLDS_STEP_POTS.
 #define FILTER_STEP_POTS
 #define FILTER_TOP_POTS
 #define FILTER_AXIS
 #define FILTER_RIBBON
 
-/* VERBOSE Definitions (Activate for debug only) -----------------------------*/
+/* VERBOSE Definitions (debug only) ----*/
 // #define VERBOSE_SERIAL
 
-#define STEPS 8                       // Number of steps of the step sequencer
+/*----------------------------------------------------------------------------*/
+/* Constants                                                                  */
+/*----------------------------------------------------------------------------*/
+#define STEPS 8                   // Number of steps/notes of the step sequencer
 
-/*Serial communication*/
+/*Serial communication -----------------*/
 const char START_MARKER = '[';
 const char END_MARKER = ']';
 const byte MAX_LENGTH_MESSAGE = 64;
 const byte MAX_LED_INTENSITY = 20;         // [0-255]
-/* Usage variables*/
+/* Usage variables ---------------------*/
 bool new_message_received = false;         // Flag for serial receiver
-unsigned long previous_micros = 0;          // microsecond counter
-unsigned long current_micros = 0;  // microsecond counter
-byte current_step = STEPS - 1;             // Current step (0,...,STEPS)
+unsigned long previous_micros = 0;         // microsecond counter
+unsigned long current_micros = 0;          // microsecond counter
 bool playing = false;                      // Sequence playing flag
 char received_message[MAX_LENGTH_MESSAGE]; // Current received message
 unsigned short step_time = 0;              // time interval in ms between steps
 unsigned short lastsent_pot_vals[8]= {0};  // Last values sent to serial
 
-/* Analog inputs -------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
+/* Analog inputs                                                              */
+/*----------------------------------------------------------------------------*/
 
 #define ANALOG_PERIOD_MICROS 1000               //current_micros
-/*- Step related controls -*/
+/*- Step related controls --------------*/
 const byte leds[8] = {2,3,4,5,6,7,8,9};         // Led pins
-const byte pots[8] = {A14,A15,A16,A17,A18,A19,A20,A21}; // Step-potentiometers pins
-/*- Other controls -*/
+const byte pots[8] = {A14,A15,A16,A17,A18,A19,A20,A21}; // Step-pots. pins
+/*- Other controls ---------------------*/
 const byte toppot_1 = A0;
 const byte toppot_2 = A1;
 const byte vert_axis = A12;
 const byte hor_axis = A13;
 const byte ribbon = A2;
 #define RIBBON_THRESHOLD 60 //under 40 the ribbon is unpressed
-// Value variables
-uint16_t vpots[STEPS]= {0};
+
+/* Value variables ---------------------*/
+uint16_t vpots[STEPS]= {0};                     // Step-pots. values
 uint16_t vpots_filtered[STEPS]= {0};
 uint16_t previous_vpots_filtered[STEPS]= {0};
-uint16_t vtoppot_1 = 0;
+
+uint16_t vtoppot_1 = 0;                        // Filter potentiometer value
 uint16_t vtoppot_1_filtered = 0;
 uint16_t previous_vtoppot_1_filtered = 0;
-uint16_t vtoppot_2 = 0;
+
+uint16_t vtoppot_2 = 0;                        // Tempo potentiometer value
 uint16_t vtoppot_2_filtered = 0;
 uint16_t previous_vtoppot_2_filtered = 0;
-uint16_t vhor_axis = 0;
+
+uint16_t vhor_axis = 0;                        // Horizontal stick axis value
 uint16_t vhor_axis_filtered = 0;
 uint16_t previous_vhor_axis_filtered = 0;
-uint16_t vvert_axis = 0;
+
+uint16_t vvert_axis = 0;                       // Vertical stick axis value
 uint16_t vvert_axis_filtered = 0;
 uint16_t previous_vvert_axis_filtered = 0;
-uint16_t vribbon = 0;
+
+uint16_t vribbon = 0;                         // Ribbon sensor value
 uint16_t vribbon_filtered = 0;
 uint16_t previous_vribbon_filtered = 0;
 
-/* Digital inputs -------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
+/* Digital inputs                                                             */
+/*----------------------------------------------------------------------------*/
 
 const byte pause_but = 29;  // pins for digital inputs
 const byte play_but = 30;
 int vpause_but = 0;        // value (or state) of digital inputs
 int vplay_but = 0;
-
+// Previous button states (for debouncing)
 int pause_but_last_button_state = HIGH;
 int play_but_last_button_state = HIGH;
+// Current button states
 int pause_but_button_state = HIGH;
 int play_but_button_state = HIGH;
+// Last debounce time for button debouncing
 unsigned long pause_but_last_debounce_time = 0;
 unsigned long play_but_last_debounce_time = 0;
-
+// Debounce interval for buttons
 unsigned long debounce_delay = 50; // increase if the output flickers
+
+/*----------------------------------------------------------------------------*/
+/* Value filtering (LOWPASS)                                                  */
+/*----------------------------------------------------------------------------*/
 
 /* 50 Hz Butterworth low-pass ----------------------------------------------*/
 // 50 Hz Butterworth low-pass
@@ -119,20 +141,21 @@ const double b_lp_50Hz[] = {0.000416599204407, 0.001666396817626,
   uint16_t vpots_threshold[STEPS] = {0};
 #endif
 
-
+/**
+ * Switch on the LED indicating the current step
+*/
 void shiftLED(byte step){
-//  Option 1.  Switch off all other leds
-//  for(int i=0; i<STEPS; ++i)
-//    analogWrite(leds[i],0);
-
-//  Option 2.  Switch off only previous led
-  byte prevstep = ((step - 1)==-1)?(STEPS-1):(step-1); //-1 and loop when at 0
-
-  analogWrite(leds[prevstep],0);
+  // Switch off all other leds
+  for(int i=0; i<STEPS; ++i)
+    analogWrite(leds[i],0);
+  //Switch on current LED
   analogWrite(leds[step],MAX_LED_INTENSITY);
 }
 
-
+/**
+ * Receive serial messages
+ * - Provided by professor during a laboratory lecture of the MIS course
+*/
 void receive_message() {
     static boolean reception_in_progress = false;
     static byte ndx = 0;
@@ -170,6 +193,9 @@ void receive_message() {
     }
 }
 
+/**
+ * Decode received message (from serial port)
+*/
 void handle_received_message(char *received_message) {
   char *all_tokens[2]; // the message is composed by 2 tokens: command and value
   const char delimiters[5] = {START_MARKER, ',', ' ', END_MARKER,'\0'};
@@ -183,24 +209,33 @@ void handle_received_message(char *received_message) {
   char *command = all_tokens[0];
   char *value = all_tokens[1];
 
+  /**
+   * Possible messages are:
+   *  - step : A step is being played by the synthesizer, the number of the
+   *           step is the integer value attached
+   *  - play : The synthesizer started playing the sequence
+   *  - stop : The synthesizer stopped playing the sequence
+  */
   if(strcmp(command,"step") == 0){
-    sequence_iteration(atoi(value));
+    // change step
+    int step = atoi(value);
+    // change step and led
+    if(playing)
+      shiftLED(step);
+    else
+      allLEDs(MAX_LED_INTENSITY); // Switch all leds on when paused
   }else if (strcmp(command,"play") == 0) {
     playing = true;
   }else if (strcmp(command,"stop") == 0) {
     playing = false;
-    for (size_t i = 0; i < STEPS; ++i)
-      analogWrite(leds[i],0);
-    analogWrite(leds[current_step],MAX_LED_INTENSITY);
   }
 
 }
 
-uint16_t mapval(uint16_t val){
-  return val * (MAX_LED_INTENSITY/1024.0);
-}
-
-
+/**
+ * Returns true if the distance between the two arguments v1,v2 is smaller than
+ * the maxerror value
+*/
 bool loose_equality(uint16_t v1,uint16_t v2, uint16_t maxerror = 4){
   if ((v1 >= (v2-maxerror)) && (v1 <= (v2+maxerror)))
     return true;
@@ -208,31 +243,10 @@ bool loose_equality(uint16_t v1,uint16_t v2, uint16_t maxerror = 4){
 }
 
 /**
- * This does the effect of having the light change when moving the pot
- */
-void pot_light_effect(){
-  for (size_t i = 0; i < STEPS; ++i){
-    if(!loose_equality(vpots_filtered[i],previous_vpots_filtered[i])){
-//        #ifdef VERBOSE_SERIAL
-//          Serial.print("Reading ");
-//          Serial.print(i);
-//          Serial.print(" ");
-//          Serial.print(vpots_filtered[i]);
-//          Serial.print(" prev ");
-//          Serial.println(previous_vpots_filtered[i]);
-//        #endif
-        analogWrite(leds[i],(int)mapval(vpots_filtered[i]));
-    }
-  }
-}
-
-void init_pot_light_effect(){
-  for (size_t i = 0; i < STEPS; ++i){
-    previous_vpots_filtered[i] = vpots_filtered[i];
-  }
-}
-
+ * Send sensor values through the serial communication
+*/
 void send_sensors(){
+  // Step potentiometers
   for (size_t i = 0; i < STEPS; ++i){
     if(!loose_equality(vpots_filtered[i],previous_vpots_filtered[i])){
       previous_vpots_filtered[i] = vpots_filtered[i];
@@ -242,27 +256,31 @@ void send_sensors(){
       Serial.println(vpots_filtered[i]);
     }
   }
-
+  // Filter potentiometer
   if(!loose_equality(vtoppot_1_filtered,previous_vtoppot_1_filtered)){
     previous_vtoppot_1_filtered = vtoppot_1_filtered;
     Serial.print("t1, ");
     Serial.println(vtoppot_1_filtered);
   }
+  // Tempo potentiometer
   if(!loose_equality(vtoppot_2_filtered,previous_vtoppot_2_filtered)){
     previous_vtoppot_2_filtered = vtoppot_2_filtered;
     Serial.print("t2, ");
     Serial.println(vtoppot_2_filtered);
   }
+  // Horizontal stick axis
   if(!loose_equality(vhor_axis_filtered,previous_vhor_axis_filtered)){
     previous_vhor_axis_filtered = vhor_axis_filtered;
     Serial.print("ha, ");
     Serial.println(vhor_axis_filtered);
   }
+  // Vertical stick axis
   if(!loose_equality(vvert_axis_filtered,previous_vvert_axis_filtered)){
     previous_vvert_axis_filtered = vvert_axis_filtered;
     Serial.print("va, ");
     Serial.println(vvert_axis_filtered);
   }
+  // Ribbon sensor (Softpot)
   if((!loose_equality(vribbon_filtered,previous_vribbon_filtered)) &&
      (vribbon_filtered > RIBBON_THRESHOLD)){
     Serial.print("rb, ");
@@ -271,30 +289,33 @@ void send_sensors(){
   }
 }
 
+/**
+ *  Initialize the system
+*/
 void setup() {
   Serial.begin(115200);
-
+  // Declare the two button pins as inputs and use pullup resistor configuration
   pinMode(pause_but, INPUT_PULLUP);
   pinMode(play_but, INPUT_PULLUP);
-
-  for (size_t i = 0; i < STEPS; ++i)
-    analogWrite(leds[i],0);
-
-  init_pot_light_effect();
+  // Initialize all leds by turning them off
+  allLEDs(0);
+  // Send sensor values to initialize the routine
   send_sensors();
+  // Initialize the playing flag
   playing = false;
 }
 
-void sequence_iteration(byte step){
-  current_step = step;
-  // change step and led
-  shiftLED(step);
+/**
+ *  Set all the LED pins to a certain PWM intensity defined by the anly argument
+*/
+void allLEDs(int intensity){
+  for(int i=0; i<STEPS; ++i)
+    analogWrite(leds[i],intensity);
 }
 
 void loop() {
   receive_message();
 
-  
   /* Handle Play button (play_but)********************************/
   vplay_but = digitalRead(play_but);
   if (vplay_but != play_but_last_button_state){
@@ -379,7 +400,6 @@ void loop() {
           vpots_filtered[i] = (vpots_filtered[i] < vpots_threshold[i]) ? 0 : vpots_filtered;
       #endif
 
-      pot_light_effect();
       send_sensors();
     }
   }
