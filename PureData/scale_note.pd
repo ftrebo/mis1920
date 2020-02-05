@@ -1,0 +1,96 @@
+#N canvas -8 -8 1680 977 12;
+#X obj 398 649 +;
+#X obj 520 491 nbx 4 16 -1e+037 1e+037 0 0 empty empty empty 0 -8 0
+12 -262130 -4160 -1 1 256;
+#N canvas 0 0 450 300 (subpatch) 0;
+#X array scale 15 float 3;
+#A 0 0 2 4 5 7 9 11 12 14 16 17 19 21 23 24;
+#X coords 0 24 15 0 200 140 1;
+#X restore 520 520 graph;
+#X obj 504 364 nbx 5 14 0 7 0 1 empty empty select_scale 0 -8 0 10
+-261682 -1 -1 0 256;
+#X msg 474 59 \; scale 0 0 2 4 5 7 9 11 12 14 16 17 19 21 23 24 \;
+;
+#X obj 523 662 hsl 195 15 0 15 0 0 empty empty empty -2 -8 0 10 -258113
+-4032 -1 1293 1;
+#X obj 398 459 +;
+#X obj 398 536 tabread scale;
+#X msg 504 388 set \$1;
+#X msg 504 412 0;
+#X obj 444 364 sel 0;
+#X obj 398 333 t f f, f 7;
+#X obj 474 18 loadbang;
+#X text 587 351 <-- 0 = ionian \, 1 = dorian \, 2 = phrygisch \, 3
+= lydian \, 4 = mixolydian \, 5 = aeolian \, 6 = locrian;
+#X obj 312 306 nbx 5 14 0 127 0 1 empty empty root_note 0 -8 0 10 -261682
+-1 -1 40 256;
+#X obj 504 277 loadbang;
+#X obj 312 256 r rootnote;
+#X obj 398 562 t b f;
+#X obj 398 305 nbx 5 14 0 127 0 1 empty empty scale_note 0 -8 0 10
+-203904 -1 -1 1 256;
+#X obj 398 719 nbx 5 20 0 127 0 1 empty empty Midi_note 70 11 0 12
+-232576 -1 -1 42 256;
+#X obj 25 358 cnv 15 220 110 empty empty Scale_to_good_note_range 28
+12 0 12 -204786 -66577 0;
+#X floatatom 36 511 5 0 0 0 - - -;
+#X floatatom 36 314 5 0 0 0 - - -;
+#X obj 36 638 int;
+#X obj 36 662 * 12;
+#X floatatom 36 686 5 0 0 0 - - -;
+#X text 24 576 Extract Root note;
+#X floatatom 172 687 5 0 0 0 - - -;
+#X text 160 530 Extract Scale note;
+#X obj 36 723 s rootnote;
+#X obj 172 568 % 7;
+#X obj 36 614 / 7;
+#X obj 36 288 inlet;
+#X text 35 254 Input is a number in [0:127];
+#X obj 36 437 int;
+#X obj 36 413 + 0.49999;
+#X obj 36 387 cyclone/scale 0 127 14 62;
+#X text 19 13 This patch is a modified version of toxonic's solution
+for tonal intervals \, proposed in the pdpatchrepo forum https://forum.pdpatchrepo.info/topic/2837/scale-in-tonal-intervals
+;
+#X text 19 99 It takes as input a value in 0:127 indicating the index
+of a note in a sequence (no connection with midi note number!) The
+module produces the midi value of the relative note according to a
+selected tonal scale;
+#X obj 398 767 outlet;
+#X obj 172 723 s scaleinterval;
+#X obj 398 256 r scaleinterval;
+#X floatatom 398 483 5 0 0 0 - - -;
+#X connect 0 0 19 0;
+#X connect 1 0 5 0;
+#X connect 3 0 8 0;
+#X connect 6 0 1 0;
+#X connect 6 0 7 0;
+#X connect 6 0 42 0;
+#X connect 7 0 17 0;
+#X connect 8 0 9 0;
+#X connect 9 0 6 1;
+#X connect 10 0 9 0;
+#X connect 11 0 6 0;
+#X connect 11 1 10 0;
+#X connect 12 0 4 0;
+#X connect 14 0 0 0;
+#X connect 15 0 3 0;
+#X connect 16 0 14 0;
+#X connect 17 0 0 0;
+#X connect 17 1 0 1;
+#X connect 18 0 11 0;
+#X connect 19 0 39 0;
+#X connect 21 0 30 0;
+#X connect 21 0 31 0;
+#X connect 22 0 36 0;
+#X connect 23 0 24 0;
+#X connect 24 0 25 0;
+#X connect 25 0 29 0;
+#X connect 27 0 40 0;
+#X connect 30 0 27 0;
+#X connect 31 0 23 0;
+#X connect 32 0 22 0;
+#X connect 34 0 21 0;
+#X connect 35 0 34 0;
+#X connect 36 0 35 0;
+#X connect 41 0 18 0;
