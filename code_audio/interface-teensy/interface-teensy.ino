@@ -32,7 +32,7 @@
 const char START_MARKER = '[';
 const char END_MARKER = ']';
 const byte MAX_LENGTH_MESSAGE = 64;
-const byte MAX_LED_INTENSITY = 20;         // [0-255]
+const byte MAX_LED_INTENSITY = 225;         // [0-255]
 /* Usage variables ---------------------*/
 bool new_message_received = false;         // Flag for serial receiver
 unsigned long previous_micros = 0;         // microsecond counter
