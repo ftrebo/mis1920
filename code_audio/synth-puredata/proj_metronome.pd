@@ -1,0 +1,76 @@
+#N canvas 544 26 517 634 12;
+#X obj 105 272 metro;
+#X floatatom 182 207 5 0 0 0 - - -;
+#X obj 105 294 bng 15 250 50 0 gate empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 105 313 f;
+#X obj 138 312 + 1;
+#X obj 105 357 mod 8;
+#X obj 105 380 hradio 15 1 0 8 empty empty empty 0 -8 0 10 -262144
+-1 -1 4;
+#X obj 105 399 select 0 1 2 3 4 5 6 7;
+#X obj 105 423 s bang1;
+#X obj 123 445 s bang2;
+#X obj 142 467 s bang3;
+#X obj 161 489 s bang4;
+#X obj 181 511 s bang5;
+#X obj 199 532 s bang6;
+#X obj 218 554 s bang7;
+#X obj 237 576 s bang8;
+#X obj 182 163 loadbang;
+#X msg 182 185 120;
+#X obj 182 228 expr 60000/$f1;
+#X floatatom 182 250 5 0 0 0 - - -;
+#X obj 105 163 inlet;
+#X obj 17 260 outlet;
+#X obj 17 236 r gate;
+#X obj 298 163 inlet;
+#X text 33 8 Metronome/Tempo module This is a module that contains
+a metronome and a 8 step bang divider. Inlet 1 receives a toggle value
+to start and stop the system while Inlet 2 receives the BPM value Output
+sent messages: bang[1-8] - 8 Bang values for each note of the sequence
+gate - Gate output (one bang at every note trigger);
+#X text 106 141 start;
+#X text 299 142 tempo;
+#X obj 367 164 inlet;
+#X msg 367 188 0;
+#X text 367 145 reset bang;
+#X floatatom 53 336 5 0 0 0 - - -;
+#X floatatom 229 341 5 0 0 0 - - -;
+#X obj 105 335 - 1;
+#X obj 371 330 int;
+#X obj 371 306 + 0.49999;
+#X obj 371 354 s millis_interval;
+#X obj 151 357 outlet;
+#X connect 0 0 2 0;
+#X connect 0 0 3 0;
+#X connect 1 0 18 0;
+#X connect 3 0 4 0;
+#X connect 3 0 30 0;
+#X connect 3 0 32 0;
+#X connect 4 0 3 1;
+#X connect 4 0 31 0;
+#X connect 5 0 6 0;
+#X connect 5 0 36 0;
+#X connect 6 0 7 0;
+#X connect 7 0 8 0;
+#X connect 7 1 9 0;
+#X connect 7 2 10 0;
+#X connect 7 3 11 0;
+#X connect 7 4 12 0;
+#X connect 7 5 13 0;
+#X connect 7 6 14 0;
+#X connect 7 7 15 0;
+#X connect 16 0 17 0;
+#X connect 17 0 1 0;
+#X connect 18 0 19 0;
+#X connect 19 0 0 1;
+#X connect 19 0 34 0;
+#X connect 20 0 0 0;
+#X connect 22 0 21 0;
+#X connect 23 0 1 0;
+#X connect 27 0 28 0;
+#X connect 28 0 3 0;
+#X connect 32 0 5 0;
+#X connect 33 0 35 0;
+#X connect 34 0 33 0;
