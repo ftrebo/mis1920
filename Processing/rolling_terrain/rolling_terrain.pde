@@ -9,14 +9,7 @@ import oscP5.*;
 /*---------------------------------------------------*/
 /* Parameters                                        */
 /*---------------------------------------------------*/
-int level = 0;
 final float relative_bpm_tollerance = 0.1;
-
-/*---------------------------------------------------*/
-/* Connections Parameters                            */
-/*---------------------------------------------------*/
-Serial serial;
-OscP5 osc;
 
 /*---------------------------------------------------*/
 /* Graphic Parameters                                */
@@ -68,7 +61,6 @@ float glight=0;
 short blue = 128;  //0-255
 float blight=1;
 short blackPoint = 20;  //minimum value for rgb
-float light = 0.3;  //0-1; 1 means that that each rgb value can reach maximum saturation
 
 /*Sun Color*/
 color sunColor = #ffccee;
@@ -76,6 +68,8 @@ color sunColor = #ffccee;
 
 
 /*DO NOT CHANGE OR DELETE**************************************/
+Serial serial;                                              /**/
+OscP5 osc;                                                  /**/
 int realMillis = millis();                                  /**/
 int rows, cols;  //Number of rows and columns               /**/
 float[][] elevation;                                        /**/
@@ -94,8 +88,8 @@ int asseY = 122;                                            /**/
 
 void setup() {
   frameRate(50);
-  //size(600, 600, P3D);
-  fullScreen(P3D);
+  size(600, 600, P3D);
+  //fullScreen(P3D);
   rows = (int)(h/scl);
   cols = (int)(w/scl);
   elevation = new float[cols][rows];
@@ -106,26 +100,25 @@ void setup() {
   for (int i=0; i < stars.length; i++) {
     stars[i] = new Star();
   }
-
-  serial = new Serial(this, Serial.list()[0], 9600);
+  
+  serial = new Serial(this, Serial.list()[0], 19200);
   serial.bufferUntil('\n');
   osc = new OscP5(this, 8080);
 }
 
 void draw() {
-  float wait = 3750*bpm_multiplier / bpm;
+  float wait = 3750 * bpm_multiplier / bpm;
+  
   background(0);
   space_init(PI/2.5);
 
   if (millis() > realMillis + wait) {
     realMillis = millis();
     elevation_init();
-    
-    if (isBpmGood(bpm, user_bpm)) level += 1;
-    else if (level <= 0) level = 0; 
-    else level -= 1;
   }
-  draw_stars();
+  
+  if (Level.drawStars()) draw_stars();
+  if (Level.drawSun()) draw_sun();
   draw_terrain();
   
 }
@@ -156,9 +149,9 @@ void elevation_init() {
       if (tmode == TerrainMode.SHADOW_GRID_BLACK_STROKE || tmode == TerrainMode.SHADOW_GRID_WHITE_STROKE)
         boxColor[x][y] = color(((noise(xCoff, yCoff))*255));
       else if (tmode == TerrainMode.COLOR_GRID_BLACK_STROKE || tmode == TerrainMode.COLOR_GRID_WHITE_STROKE)
-        boxColor[x][y] = color((((noise(xCoff, yCoff)*100*red)%(255-blackPoint))+blackPoint)*light*rlight, 
-          (((noise(xCoff, yCoff)*100*green)%(255-blackPoint))+blackPoint)*light*glight, 
-          (((noise(xCoff, yCoff)*100*blue)%(255-blackPoint))+blackPoint)*light*blight);
+        boxColor[x][y] = color((((noise(xCoff, yCoff)*100*red)%(255-blackPoint))+blackPoint)*Level.colorIntensity()*rlight, 
+          (((noise(xCoff, yCoff)*100*green)%(255-blackPoint))+blackPoint)*Level.colorIntensity()*glight, 
+          (((noise(xCoff, yCoff)*100*blue)%(255-blackPoint))+blackPoint)*Level.colorIntensity()*blight);
 
       xoff += offsetIncrement;
       xCoff += colorOffsetIncrement;
@@ -208,6 +201,7 @@ void draw_terrain() {
   }
 }
 void draw_sun() {
+  pushMatrix();
   switch(smode) {
   case SunMode.GRID:
     noFill();
@@ -247,6 +241,7 @@ void draw_sun() {
     rotateY(radians(frameCount*map(speed, 0, 255, 0.01, 3)));
   sphereDetail(sunDetail);
   sphere(300);
+  popMatrix();
 }
 
 void draw_stars() {
@@ -286,24 +281,37 @@ void serialEvent(Serial serial) {
       param = int(serialIn.substring(2, serialIn.indexOf("\n")-1));
       if (command.equals("Y-")) bpm_multiplier = int(map(param, 0, 255, 5, 1));
       if (command.equals("X-")) starspeed_multiplier = map(param, 0, 255, 0.3, 4);
-      if (command.equals("T-")) user_bpm = param;
+      if (command.equals("T-")) {
+        if (isBpmGood(bpm, param) == true) Level.hit();
+        else { 
+          if (param == 0) Level.miss(5);
+          else Level.miss(); 
+        }
+      }
     } 
     catch (Exception e) {
-      println("some error...");
+      println("-- Serial error --");
     }
   }
 }
 
+int tempoCounter = 0;
+int tempoDiv = 1;
 void oscEvent(OscMessage theOscMessage) {
   if (theOscMessage.checkAddrPattern("/tempo")==true) {
     bpm = int(oscReceive(theOscMessage));
-    serial.write("T");
+    tempoDiv = (bpm > 240) ? 2 : 1;
+    tempoCounter += 1;
+    if (tempoCounter >= tempoDiv) {
+      tempoCounter = 0;
+      serial.write("T");
+    }
+    
   } else if (theOscMessage.checkAddrPattern("/Yaxis")==true) {
     rlight = oscReceive(theOscMessage);
   } else if (theOscMessage.checkAddrPattern("/Xaxis")==true) {
     blight = oscReceive(theOscMessage);
   } else if (theOscMessage.checkAddrPattern("/filter")==true) {
-    light = oscReceive(theOscMessage);
     zscl = map(oscReceive(theOscMessage), 0, 1, 50, 200);
   }   
   //println("Received OSC: "+theOscMessage.addrPattern()+" - ");
