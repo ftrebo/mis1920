@@ -10,7 +10,7 @@
  *
  */
 
-final static int MAX_LEVEL = 50;    // Maximum level reachable
+final static int MAX_LEVEL = 100;    // Maximum level reachable
 final static int LEVEL_INCREASE = 1; //  Increase step (upon hit)
 final static int LEVEL_DECREASE = 1; //  Decrease step (upon miss)
 
@@ -27,8 +27,8 @@ static class Level{
       level += LEVEL_INCREASE;
       
       _colorIntensity = map(level, 0, MAX_LEVEL, 0, 1);
-      if (level >= 20) _drawStars = true;
-      if (level >= 30) _drawSun = true;
+      if (level >= 40) _drawStars = true;
+      if (level >= 60) _drawSun = true;
     }
   }
 
@@ -37,8 +37,8 @@ static class Level{
       level -= LEVEL_INCREASE;
 
       _colorIntensity = map(level, 0, MAX_LEVEL, 0, 1);
-      if (level < 20) _drawStars = false;
-      if (level < 30) _drawSun = false;
+      if (level < 40) _drawStars = false;
+      if (level < 60) _drawSun = false;
     }
   }
   
