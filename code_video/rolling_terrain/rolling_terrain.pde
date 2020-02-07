@@ -1,5 +1,5 @@
 /********************************************************************************************************/
-/* OSC Based Rolling Terrain Demo                                                                       */
+/* OSC Based Rolling Terrain                                                                       */
 /* Authors: Domenico Stefani, Francesco Trebo                                                           */
 /********************************************************************************************************/
 
@@ -87,7 +87,7 @@ int tempo_feedback = 1;                                     /**/
 
 void setup() {
   frameRate(50);
-  //   size(600, 600, P3D);
+  //size(600, 600, P3D); //for testing purposes
   fullScreen(P3D);
   rows = (int)(h/scl);
   cols = (int)(w/scl);
@@ -103,8 +103,6 @@ void setup() {
   serial = new Serial(this, Serial.list()[0], 19200);
   serial.bufferUntil('\n');
   osc = new OscP5(this, 8080);
-  
-  
 }
 
 void draw() {
@@ -135,9 +133,7 @@ void draw() {
   circle(width/2 , 20, 20);
   if (tempo_feedback == 2) fill(255,0,0);
   else fill(0);
-  circle(width/2 + 30, 20, 20);
-  
-  
+  circle(width/2 + 30, 20, 20); 
 }
 
 boolean isBpmGood(int bpm, int user_bpm) {

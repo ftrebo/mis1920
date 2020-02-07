@@ -5,7 +5,7 @@
  * the related improvements in the quality of the generated
  * graphics.
  *
- * Author: Domenico Stefani, Franv
+ * Author: Domenico Stefani, Francesco Trebo
  * Date: 03/02/2020
  *
  */
