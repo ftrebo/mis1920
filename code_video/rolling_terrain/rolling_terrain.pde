@@ -137,12 +137,12 @@ void draw() {
 }
 
 boolean isBpmGood(int bpm, int user_bpm) {
-  float tollerance = bpm * relative_bpm_tollerance;
-  if (abs(bpm*2 - user_bpm) < tollerance) return true;
-  if (abs(bpm - user_bpm) < tollerance) return true;
-  if (abs(bpm/2 - user_bpm) < tollerance/2) return true;
-  if (abs(bpm/4 - user_bpm) < tollerance/4) return true;
-  if (abs(bpm/8 - user_bpm) < tollerance/8) return true;
+  float tolerance = bpm * relative_bpm_tollerance;
+  if (abs(bpm*2 - user_bpm) < tolerance) return true;
+  if (abs(bpm - user_bpm) < tolerance) return true;
+  if (abs(bpm/2 - user_bpm) < tolerance/2) return true;
+  if (abs(bpm/4 - user_bpm) < tolerance/4) return true;
+  if (abs(bpm/8 - user_bpm) < tolerance/8) return true;
   return false;
 }
 
